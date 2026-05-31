@@ -24,6 +24,7 @@ export interface GuestSession {
   routed_to: "agent" | "bot";
   handler_jid: string;
   welcome_message: string;
+  nxws: string;
 }
 
 export interface ChatMessage {

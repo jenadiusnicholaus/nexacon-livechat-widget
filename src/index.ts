@@ -85,7 +85,12 @@ export class NexaconChatWidget {
         session.routed_to === "agent" ? handlerName : "Support Bot",
       );
 
-      this.connectXmpp(session.guest_jid, session.token, session.room_jid);
+      this.connectXmpp(
+        session.guest_jid,
+        session.token,
+        session.room_jid,
+        session.nxws,
+      );
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       this.setState("error");
@@ -94,9 +99,14 @@ export class NexaconChatWidget {
     }
   }
 
-  private connectXmpp(jid: string, token: string, roomJid: string): void {
+  private connectXmpp(
+    jid: string,
+    token: string,
+    roomJid: string,
+    nxws?: string,
+  ): void {
     this.xmpp = new XmppClient({
-      wsUrl: this.options.nxws,
+      wsUrl: nxws || this.options.nxws,
       jid,
       password: token,
       roomJid,
