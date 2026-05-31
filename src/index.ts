@@ -4,7 +4,7 @@ import { WidgetUI } from "./widget-ui";
 import { ChatMessage, ChatOptions, ConnectionState } from "./types";
 
 const DEFAULT_BASE_URL = "https://nxservice.quantumvision-tech.com/api/v1.0";
-const DEFAULT_EJABBERD_WS = "wss://nexacon.cloud:5443/ws";
+const NXWS = "wss://nxservice.quantumvision-tech.com/nx-websocket/";
 
 export class NexaconChatWidget {
   private options: Required<ChatOptions>;
@@ -18,7 +18,6 @@ export class NexaconChatWidget {
     this.options = {
       widgetId: options.widgetId,
       baseUrl: options.baseUrl || DEFAULT_BASE_URL,
-      nxws: options.nxws || DEFAULT_EJABBERD_WS,
       visitorName: options.visitorName || "",
       visitorEmail: options.visitorEmail || "",
       visitorId: options.visitorId || crypto.randomUUID(),
@@ -80,17 +79,12 @@ export class NexaconChatWidget {
       );
 
       const handlerName =
-        session.handler_jid.split("@")[0].replace(/-/g, " ") || "Support";
+        session.handler.split("@")[0].replace(/-/g, " ") || "Support";
       this.ui.setHandlerName(
         session.routed_to === "agent" ? handlerName : "Support Bot",
       );
 
-      this.connectXmpp(
-        session.guest_jid,
-        session.token,
-        session.room_jid,
-        session.nxws,
-      );
+      this.connectXmpp(session.session_id, session.token, session.channel);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       this.setState("error");
@@ -99,14 +93,9 @@ export class NexaconChatWidget {
     }
   }
 
-  private connectXmpp(
-    jid: string,
-    token: string,
-    roomJid: string,
-    nxws?: string,
-  ): void {
+  private connectXmpp(jid: string, token: string, roomJid: string): void {
     this.xmpp = new XmppClient({
-      wsUrl: nxws || this.options.nxws,
+      wsUrl: NXWS,
       jid,
       password: token,
       roomJid,
@@ -200,11 +189,10 @@ function autoInit(): void {
     if (!widgetId) return;
 
     const baseUrl = script.getAttribute("data-base-url") || undefined;
-    const nxws = script.getAttribute("data-nxws") || undefined;
     const visitorName = script.getAttribute("data-visitor-name") || undefined;
     const visitorEmail = script.getAttribute("data-visitor-email") || undefined;
 
-    init({ widgetId, baseUrl, nxws, visitorName, visitorEmail });
+    init({ widgetId, baseUrl, visitorName, visitorEmail });
   });
 }
 

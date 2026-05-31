@@ -1,7 +1,6 @@
 export interface ChatOptions {
   widgetId: string;
   baseUrl?: string;
-  nxws?: string;
   visitorName?: string;
   visitorEmail?: string;
   visitorId?: string;
@@ -16,15 +15,14 @@ export interface WidgetConfig {
 }
 
 export interface GuestSession {
-  guest_jid: string;
+  session_id: string;
   token: string;
-  room_jid: string;
+  channel: string;
   expires_in: number;
   ticket_id: number;
   routed_to: "agent" | "bot";
-  handler_jid: string;
+  handler: string;
   welcome_message: string;
-  nxws: string;
 }
 
 export interface ChatMessage {
