@@ -1,17 +1,78 @@
 # Nexacon Live Chat Widget
 
-Embeddable live chat widget for any website. Drop a single `<script>` tag and you're done.
+Embeddable live chat widget for any website. Drop a single `<script>` tag or use as a library in TypeScript/JavaScript projects.
 
-## Quick Start
+## Quick Start (Script Tag)
 
 ```html
 <script
-  src="https://cdn.nexacon.com/livechat/nexacon-chat.js"
+  src="https://unpkg.com/nexacon-livechat-widget/dist/widget.min.js"
   data-widget-id="YOUR_WIDGET_UUID"
 ></script>
 ```
 
 That's it. The widget auto-initializes, shows a chat bubble in the bottom-right corner, and connects visitors to your support agent or bot.
+
+## Use as a Library (TypeScript/JavaScript)
+
+Install:
+
+```bash
+npm install nexacon-livechat-widget
+```
+
+**Core API client + XMPP client:**
+
+```typescript
+import { ApiClient, XmppClient } from "nexacon-livechat-widget";
+
+const api = new ApiClient("https://your-server.com/api/v1.0");
+
+// Get widget config
+const config = await api.getWidgetConfig("your-widget-id");
+
+// Create guest session
+const session = await api.createGuestSession("your-widget-id", {
+  visitorId: "user-123",
+  name: "John Doe",
+  email: "john@example.com",
+});
+
+// Connect via XMPP
+const xmpp = new XmppClient({
+  wsUrl: "wss://nxservice.quantumvision-tech.com/nx-websocket/",
+  jid: session.session_id,
+  password: session.token,
+  roomJid: session.channel,
+});
+
+xmpp.onMessage = (from, body) => {
+  console.log("Message from", from, ":", body);
+};
+
+xmpp.onStateChange = (state) => {
+  console.log("Connection state:", state);
+};
+
+xmpp.connect();
+xmpp.sendMessage("Hello!");
+```
+
+**Full widget (with UI) in React:**
+
+```tsx
+import { NexaconChatWidget } from "nexacon-livechat-widget/widget";
+
+useEffect(() => {
+  const widget = new NexaconChatWidget({
+    widgetId: "your-widget-id",
+    baseUrl: "https://your-server.com/api/v1.0",
+    visitorName: "John Doe",
+  });
+  widget.init();
+  return () => widget.destroy();
+}, []);
+```
 
 ## How It Works
 
@@ -36,36 +97,20 @@ Widget SDK (this library)
 
 ## Script Tag Attributes
 
-| Attribute | Required | Description |
-|---|---|---|
-| `data-widget-id` | **Yes** | Widget UUID from your Nexacon dashboard |
-| `data-base-url` | No | API base URL (default: Nexacon cloud) |
-| `data-ejabberd-ws` | No | Ejabberd WebSocket URL (default: Nexacon cloud) |
-| `data-visitor-name` | No | Pre-fill visitor name |
-| `data-visitor-email` | No | Pre-fill visitor email |
-
-## Programmatic Init
-
-```html
-<script src="nexacon-chat.js"></script>
-<script>
-  NexaconChat.init({
-    widgetId: 'YOUR_WIDGET_UUID',
-    baseUrl: 'https://your-server.com/api/v1.0',
-    ejabberdWsUrl: 'wss://your-ejabberd.com:5443/ws',
-    visitorName: 'John Doe',
-    visitorEmail: 'john@example.com',
-  });
-</script>
-```
+| Attribute            | Required | Description                             |
+| -------------------- | -------- | --------------------------------------- |
+| `data-widget-id`     | **Yes**  | Widget UUID from your Nexacon dashboard |
+| `data-base-url`      | No       | API base URL (default: Nexacon cloud)   |
+| `data-visitor-name`  | No       | Pre-fill visitor name                   |
+| `data-visitor-email` | No       | Pre-fill visitor email                  |
 
 ## Build
 
 ```bash
 npm install
-npm run build        # development build → dist/nexacon-chat.js
-npm run build:min    # minified → dist/nexacon-chat.min.js
-npm run build:all    # both + TypeScript declarations
+npm run build        # library (ESM) + widget (IIFE)
+npm run build:min    # minified widget
+npm run build:all    # all builds + TypeScript declarations
 npm run dev          # watch mode
 ```
 

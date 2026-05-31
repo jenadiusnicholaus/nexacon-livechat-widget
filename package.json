@@ -2,14 +2,27 @@
   "name": "nexacon-livechat-widget",
   "version": "1.0.0",
   "description": "Embeddable live chat widget for Nexacon — drop a single script tag into any website",
-  "main": "dist/nexacon-chat.js",
-  "types": "dist/types/index.d.ts",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./widget": {
+      "import": "./dist/widget.js",
+      "types": "./dist/widget.d.ts"
+    }
+  },
   "scripts": {
-    "build": "esbuild src/index.ts --bundle --outfile=dist/nexacon-chat.js --format=iife --global-name=NexaconChat --target=es2018",
-    "build:min": "esbuild src/index.ts --bundle --outfile=dist/nexacon-chat.min.js --format=iife --global-name=NexaconChat --target=es2018 --minify",
-    "build:types": "tsc --emitDeclarationOnly --outDir dist/types",
+    "build": "npm run build:lib && npm run build:widget",
+    "build:lib": "esbuild src/core.ts --bundle --outfile=dist/index.js --format=esm --target=es2018",
+    "build:widget": "esbuild src/index.ts --bundle --outfile=dist/widget.js --format=iife --global-name=NexaconChat --target=es2018",
+    "build:min": "esbuild src/index.ts --bundle --outfile=dist/widget.min.js --format=iife --global-name=NexaconChat --target=es2018 --minify",
+    "build:types": "tsc --emitDeclarationOnly",
     "build:all": "npm run build && npm run build:min && npm run build:types",
-    "dev": "esbuild src/index.ts --bundle --outfile=dist/nexacon-chat.js --format=iife --global-name=NexaconChat --target=es2018 --watch",
+    "dev": "esbuild src/index.ts --bundle --outfile=dist/widget.js --format=iife --global-name=NexaconChat --target=es2018 --watch",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [
