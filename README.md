@@ -73,27 +73,6 @@ useEffect(() => {
 }, []);
 ```
 
-## How It Works
-
-```
-Website visitor
-    │
-    │  <script data-widget-id="...">
-    │
-    ▼
-Widget SDK (this library)
-    │
-    ├── GET  /live-chat/widget/{id}/config/       ← load colors, bot name
-    │
-    ├── POST /live-chat/widget/{id}/guest-session/ ← create anonymous session
-    │         returns: guest_jid, token, room_jid
-    │
-    └── WebSocket → Ejabberd XMPP                 ← real-time chat
-              authenticate as guest_jid with token
-              join MUC room
-              send/receive messages
-```
-
 ## Script Tag Attributes
 
 | Attribute            | Required | Description                             |
