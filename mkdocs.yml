@@ -1,0 +1,30 @@
+site_name: Nexacon Live Chat Widget
+site_description: Embeddable live chat widget — drop a single script tag into any website
+site_url: https://nexacon-livechat-widget.readthedocs.io
+repo_url: https://github.com/jenadiusnicholaus/nexacon-livechat-widget
+repo_name: nexacon-livechat-widget
+
+theme:
+  name: material
+  palette:
+    primary: blue
+    accent: blue
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - content.code.copy
+
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - API Reference: api-reference.md
+  - Architecture: architecture.md
+
+markdown_extensions:
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - admonition
+  - toc:
+      permalink: true

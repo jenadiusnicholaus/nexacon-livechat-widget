@@ -1,0 +1,38 @@
+{
+  "name": "nexacon-livechat-widget",
+  "version": "1.0.0",
+  "description": "Embeddable live chat widget for Nexacon — drop a single script tag into any website",
+  "main": "dist/nexacon-chat.js",
+  "types": "dist/types/index.d.ts",
+  "scripts": {
+    "build": "esbuild src/index.ts --bundle --outfile=dist/nexacon-chat.js --format=iife --global-name=NexaconChat --target=es2018",
+    "build:min": "esbuild src/index.ts --bundle --outfile=dist/nexacon-chat.min.js --format=iife --global-name=NexaconChat --target=es2018 --minify",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist/types",
+    "build:all": "npm run build && npm run build:min && npm run build:types",
+    "dev": "esbuild src/index.ts --bundle --outfile=dist/nexacon-chat.js --format=iife --global-name=NexaconChat --target=es2018 --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "nexacon",
+    "live-chat",
+    "widget",
+    "embeddable",
+    "chat",
+    "support"
+  ],
+  "author": "Nexacon",
+  "license": "MIT",
+  "devDependencies": {
+    "esbuild": "^0.20.0",
+    "typescript": "^5.2.0"
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

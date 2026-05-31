@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nexacon Live Chat — Embed Example</title>
+    <style>
+      body { font-family: sans-serif; max-width: 700px; margin: 60px auto; padding: 0 20px; }
+      h1 { color: #333; }
+      pre { background: #f4f4f4; padding: 16px; border-radius: 8px; overflow-x: auto; }
+      code { color: #d63384; }
+    </style>
+  </head>
+  <body>
+    <h1>Nexacon Live Chat Widget Demo</h1>
+    <p>This page embeds the live chat widget. The chat bubble should appear in the bottom-right corner.</p>
+
+    <h2>Method 1: Script tag (auto-init)</h2>
+    <pre><code>&lt;script
+  src="nexacon-chat.js"
+  data-widget-id="YOUR_WIDGET_UUID"
+  data-visitor-name="John Doe"
+  data-visitor-email="john@example.com"
+&gt;&lt;/script&gt;</code></pre>
+
+    <h2>Method 2: Programmatic init</h2>
+    <pre><code>&lt;script src="nexacon-chat.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+  NexaconChat.init({
+    widgetId: 'YOUR_WIDGET_UUID',
+    visitorName: 'John Doe',
+    visitorEmail: 'john@example.com',
+    baseUrl: 'https://your-nexacon-server.com/api/v1.0',
+    ejabberdWsUrl: 'wss://your-ejabberd-server.com:5443/ws',
+  });
+&lt;/script&gt;</code></pre>
+
+    <p>
+      The widget only needs a <strong>widget ID</strong>. 
+      API key and secret key are kept on the server — never exposed to visitors.
+    </p>
+  </body>
+
+  <!--
+    To test locally:
+    1. Build the SDK:  npm run build
+    2. Copy dist/nexacon-chat.js to this folder
+    3. Replace YOUR_WIDGET_UUID with a real widget_id from your backend
+    4. Open this file in a browser
+  -->
+  <script
+    src="../dist/nexacon-chat.js"
+    data-widget-id="YOUR_WIDGET_UUID_HERE"
+    data-base-url="http://localhost:8001/api/v1.0"
+    data-ejabberd-ws="wss://nexacon.cloud:5443/ws"
+    data-visitor-name="Demo Visitor"
+  ></script>
+</html>
