@@ -93,6 +93,27 @@ const CSS = `
 }
 #nx-chat-typing.nx-visible { display: block; }
 
+#nx-prechat-form {
+  position: absolute; inset: 0; z-index: 10;
+  background: #fff; display: flex; flex-direction: column;
+  justify-content: center; padding: 28px 24px; gap: 14px;
+}
+#nx-prechat-form h4 { margin: 0 0 4px; font-size: 16px; color: #222; }
+#nx-prechat-form p { margin: 0; font-size: 13px; color: #777; }
+#nx-prechat-form input {
+  border: 1px solid #ddd; border-radius: 8px;
+  padding: 10px 12px; font-size: 14px; outline: none;
+  font-family: inherit; width: 100%; box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+#nx-prechat-form input:focus { border-color: #007bff; }
+#nx-prechat-form button {
+  padding: 11px; border: none; border-radius: 8px;
+  background: #007bff; color: #fff; font-size: 14px;
+  font-weight: 600; cursor: pointer; transition: background 0.15s;
+}
+#nx-prechat-form button:hover { background: #0056cc; }
+
 @media (max-width: 420px) {
   #nx-chat-window { width: calc(100vw - 16px); right: 8px; bottom: 80px; }
 }
@@ -106,6 +127,7 @@ export class WidgetUI {
   private headerTitle!: HTMLElement;
   private headerSub!: HTMLElement;
   private typingEl!: HTMLElement;
+  private preChatFormEl!: HTMLElement;
   private isOpen = false;
   private primaryColor = "#007bff";
 
@@ -130,11 +152,15 @@ export class WidgetUI {
   setColor(color: string): void {
     this.primaryColor = color;
     this.bubble.style.background = color;
-    (this.window.querySelector("#nx-chat-header") as HTMLElement).style.background = color;
-    (this.window.querySelector("#nx-chat-send") as HTMLElement).style.background = color;
-    (document.querySelectorAll(".nx-msg.nx-visitor") as NodeListOf<HTMLElement>).forEach(
-      (el) => (el.style.background = color)
-    );
+    (
+      this.window.querySelector("#nx-chat-header") as HTMLElement
+    ).style.background = color;
+    (
+      this.window.querySelector("#nx-chat-send") as HTMLElement
+    ).style.background = color;
+    (
+      document.querySelectorAll(".nx-msg.nx-visitor") as NodeListOf<HTMLElement>
+    ).forEach((el) => (el.style.background = color));
   }
 
   setHandlerName(name: string): void {
@@ -189,7 +215,8 @@ export class WidgetUI {
 
   enableInput(enabled: boolean): void {
     this.inputEl.disabled = !enabled;
-    (this.window.querySelector("#nx-chat-send") as HTMLButtonElement).disabled = !enabled;
+    (this.window.querySelector("#nx-chat-send") as HTMLButtonElement).disabled =
+      !enabled;
   }
 
   open(): void {
@@ -268,6 +295,9 @@ export class WidgetUI {
     header.appendChild(info);
     header.appendChild(closeBtn);
 
+    this.preChatFormEl = this.createPreChatForm();
+    win.appendChild(this.preChatFormEl);
+
     this.messagesEl = document.createElement("div");
     this.messagesEl.id = "nx-chat-messages";
 
@@ -301,5 +331,61 @@ export class WidgetUI {
     win.appendChild(inputArea);
 
     return win;
+  }
+
+  private createPreChatForm(): HTMLElement {
+    const form = document.createElement("div");
+    form.id = "nx-prechat-form";
+    form.style.display = "none";
+
+    const title = document.createElement("h4");
+    title.textContent = "Start a conversation";
+    const sub = document.createElement("p");
+    sub.textContent = "We'll reply as soon as possible.";
+
+    const nameInput = document.createElement("input");
+    nameInput.type = "text";
+    nameInput.placeholder = "Your name";
+    nameInput.id = "nx-prechat-name";
+
+    const emailInput = document.createElement("input");
+    emailInput.type = "email";
+    emailInput.placeholder = "Email address (optional)";
+    emailInput.id = "nx-prechat-email";
+
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.textContent = "Start Chat";
+    btn.style.background = this.primaryColor;
+    btn.addEventListener("click", () => {
+      if (this._preChatSubmit) {
+        this._preChatSubmit(nameInput.value.trim(), emailInput.value.trim());
+      }
+    });
+    nameInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") emailInput.focus();
+    });
+    emailInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") btn.click();
+    });
+
+    form.appendChild(title);
+    form.appendChild(sub);
+    form.appendChild(nameInput);
+    form.appendChild(emailInput);
+    form.appendChild(btn);
+    return form;
+  }
+
+  private _preChatSubmit: ((name: string, email: string) => void) | null = null;
+
+  showPreChatForm(onSubmit: (name: string, email: string) => void): void {
+    this._preChatSubmit = onSubmit;
+    this.preChatFormEl.style.display = "flex";
+    (document.getElementById("nx-prechat-name") as HTMLInputElement)?.focus();
+  }
+
+  hidePreChatForm(): void {
+    this.preChatFormEl.style.display = "none";
   }
 }

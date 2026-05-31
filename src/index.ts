@@ -19,9 +19,10 @@ export class NexaconChatWidget {
       widgetId: options.widgetId,
       baseUrl: options.baseUrl || DEFAULT_BASE_URL,
       ejabberdWsUrl: options.ejabberdWsUrl || DEFAULT_EJABBERD_WS,
-      visitorName: options.visitorName || "Visitor",
+      visitorName: options.visitorName || "",
       visitorEmail: options.visitorEmail || "",
       visitorId: options.visitorId || crypto.randomUUID(),
+      preChatForm: options.preChatForm ?? !options.visitorName,
     };
 
     this.api = new ApiClient(this.options.baseUrl);
@@ -31,7 +32,17 @@ export class NexaconChatWidget {
     this.ui.onOpen = () => {
       if (!this.sessionStarted) {
         this.sessionStarted = true;
-        this.startSession();
+        if (this.options.preChatForm) {
+          this.ui.showPreChatForm((name, email) => {
+            this.options.visitorName = name || "Visitor";
+            this.options.visitorEmail = email;
+            this.ui.hidePreChatForm();
+            this.startSession();
+          });
+        } else {
+          this.options.visitorName = this.options.visitorName || "Visitor";
+          this.startSession();
+        }
       }
     };
   }
@@ -59,17 +70,19 @@ export class NexaconChatWidget {
         email: this.options.visitorEmail,
       });
 
-      this.addSystemMessage(session.welcome_message || "Welcome! How can we help?");
+      this.addSystemMessage(
+        session.welcome_message || "Welcome! How can we help?",
+      );
       this.addSystemMessage(
         session.routed_to === "agent"
           ? "You are connected to a support agent."
-          : "You are connected to our AI assistant."
+          : "You are connected to our AI assistant.",
       );
 
       const handlerName =
         session.handler_jid.split("@")[0].replace(/-/g, " ") || "Support";
       this.ui.setHandlerName(
-        session.routed_to === "agent" ? handlerName : "Support Bot"
+        session.routed_to === "agent" ? handlerName : "Support Bot",
       );
 
       this.connectXmpp(session.guest_jid, session.token, session.room_jid);
@@ -169,7 +182,7 @@ export function init(options: ChatOptions): NexaconChatWidget {
 
 function autoInit(): void {
   const scripts = document.querySelectorAll<HTMLScriptElement>(
-    'script[data-widget-id]'
+    "script[data-widget-id]",
   );
 
   scripts.forEach((script) => {
