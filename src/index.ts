@@ -18,7 +18,7 @@ export class NexaconChatWidget {
     this.options = {
       widgetId: options.widgetId,
       baseUrl: options.baseUrl || DEFAULT_BASE_URL,
-      ejabberdWsUrl: options.ejabberdWsUrl || DEFAULT_EJABBERD_WS,
+      nxws: options.nxws || DEFAULT_EJABBERD_WS,
       visitorName: options.visitorName || "",
       visitorEmail: options.visitorEmail || "",
       visitorId: options.visitorId || crypto.randomUUID(),
@@ -96,7 +96,7 @@ export class NexaconChatWidget {
 
   private connectXmpp(jid: string, token: string, roomJid: string): void {
     this.xmpp = new XmppClient({
-      wsUrl: this.options.ejabberdWsUrl,
+      wsUrl: this.options.nxws,
       jid,
       password: token,
       roomJid,
@@ -190,11 +190,11 @@ function autoInit(): void {
     if (!widgetId) return;
 
     const baseUrl = script.getAttribute("data-base-url") || undefined;
-    const ejabberdWsUrl = script.getAttribute("data-ejabberd-ws") || undefined;
+    const nxws = script.getAttribute("data-nxws") || undefined;
     const visitorName = script.getAttribute("data-visitor-name") || undefined;
     const visitorEmail = script.getAttribute("data-visitor-email") || undefined;
 
-    init({ widgetId, baseUrl, ejabberdWsUrl, visitorName, visitorEmail });
+    init({ widgetId, baseUrl, nxws, visitorName, visitorEmail });
   });
 }
 

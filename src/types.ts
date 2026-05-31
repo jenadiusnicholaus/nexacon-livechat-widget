@@ -1,7 +1,7 @@
 export interface ChatOptions {
   widgetId: string;
   baseUrl?: string;
-  ejabberdWsUrl?: string;
+  nxws?: string;
   visitorName?: string;
   visitorEmail?: string;
   visitorId?: string;
