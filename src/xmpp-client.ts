@@ -1,7 +1,10 @@
 export type MessageHandler = (from: string, body: string) => void;
-export type StateHandler = (state: "connected" | "disconnected" | "error", detail?: string) => void;
+export type StateHandler = (
+  state: "connected" | "disconnected" | "error",
+  detail?: string,
+) => void;
 
-export class XmppClient {
+export class nxClient {
   private ws: WebSocket | null = null;
   private wsUrl: string;
   private jid: string;
@@ -66,7 +69,7 @@ export class XmppClient {
     this.send(
       `<message to="${this.roomJid}" type="groupchat">` +
         `<body>${escaped}</body>` +
-        `</message>`
+        `</message>`,
     );
   }
 
@@ -75,7 +78,7 @@ export class XmppClient {
       `<?xml version="1.0"?>` +
         `<stream:stream xmlns="jabber:client" ` +
         `xmlns:stream="http://etherx.jabber.org/streams" ` +
-        `to="${this.domain}" version="1.0" xml:lang="en">`
+        `to="${this.domain}" version="1.0" xml:lang="en">`,
     );
   }
 
@@ -105,7 +108,11 @@ export class XmppClient {
       }
     }
 
-    if (data.includes("<iq") && data.includes('type="result"') && data.includes("bind")) {
+    if (
+      data.includes("<iq") &&
+      data.includes('type="result"') &&
+      data.includes("bind")
+    ) {
       this.joinRoom();
       this.onStateChange("connected");
       return;
@@ -121,7 +128,7 @@ export class XmppClient {
     const authStr = btoa(`\0${user}\0${this.password}`);
     this.send(
       `<auth xmlns="urn:ietf:params:xml:ns:xmpp-sasl" mechanism="PLAIN">` +
-        `${authStr}</auth>`
+        `${authStr}</auth>`,
     );
   }
 
@@ -130,7 +137,7 @@ export class XmppClient {
       `<iq type="set" id="bind1">` +
         `<bind xmlns="urn:ietf:params:xml:ns:xmpp-bind">` +
         `<resource>widget</resource>` +
-        `</bind></iq>`
+        `</bind></iq>`,
     );
   }
 
@@ -138,7 +145,7 @@ export class XmppClient {
     this.send(
       `<presence to="${this.roomJid}/${this.nick}">` +
         `<x xmlns="http://jabber.org/protocol/muc"/>` +
-        `</presence>`
+        `</presence>`,
     );
   }
 

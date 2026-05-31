@@ -21,12 +21,12 @@ Install:
 npm install nexacon-livechat-widget
 ```
 
-**Core API client + XMPP client:**
+**Core API client + WebSocket client:**
 
 ```typescript
-import { ApiClient, XmppClient } from "nexacon-livechat-widget";
+import { ApiClient, nxClient } from "nexacon-livechat-widget";
 
-const api = new ApiClient("https://your-server.com/api/v1.0");
+const api = new ApiClient();
 
 // Get widget config
 const config = await api.getWidgetConfig("your-widget-id");
@@ -38,24 +38,24 @@ const session = await api.createGuestSession("your-widget-id", {
   email: "john@example.com",
 });
 
-// Connect via XMPP
-const xmpp = new XmppClient({
+// Connect via WebSocket
+const nx = new nxClient({
   wsUrl: "wss://nxservice.quantumvision-tech.com/nx-websocket/",
   jid: session.session_id,
   password: session.token,
   roomJid: session.channel,
 });
 
-xmpp.onMessage = (from, body) => {
+nx.onMessage = (from, body) => {
   console.log("Message from", from, ":", body);
 };
 
-xmpp.onStateChange = (state) => {
+nx.onStateChange = (state) => {
   console.log("Connection state:", state);
 };
 
-xmpp.connect();
-xmpp.sendMessage("Hello!");
+nx.connect();
+nx.sendMessage("Hello!");
 ```
 
 **Full widget (with UI) in React:**
@@ -66,7 +66,6 @@ import { NexaconChatWidget } from "nexacon-livechat-widget/widget";
 useEffect(() => {
   const widget = new NexaconChatWidget({
     widgetId: "your-widget-id",
-    baseUrl: "https://your-server.com/api/v1.0",
     visitorName: "John Doe",
   });
   widget.init();
@@ -100,7 +99,6 @@ Widget SDK (this library)
 | Attribute            | Required | Description                             |
 | -------------------- | -------- | --------------------------------------- |
 | `data-widget-id`     | **Yes**  | Widget UUID from your Nexacon dashboard |
-| `data-base-url`      | No       | API base URL (default: Nexacon cloud)   |
 | `data-visitor-name`  | No       | Pre-fill visitor name                   |
 | `data-visitor-email` | No       | Pre-fill visitor email                  |
 

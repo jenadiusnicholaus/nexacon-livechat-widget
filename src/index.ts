@@ -1,15 +1,14 @@
 import { ApiClient } from "./api-client";
-import { XmppClient } from "./xmpp-client";
+import { nxClient } from "./xmpp-client";
 import { WidgetUI } from "./widget-ui";
 import { ChatMessage, ChatOptions, ConnectionState } from "./types";
 
-const DEFAULT_BASE_URL = "https://nxservice.quantumvision-tech.com/api/v1.0";
 const NXWS = "wss://nxservice.quantumvision-tech.com/nx-websocket/";
 
 export class NexaconChatWidget {
   private options: Required<ChatOptions>;
   private api: ApiClient;
-  private xmpp: XmppClient | null = null;
+  private xmpp: nxClient | null = null;
   private ui: WidgetUI;
   private state: ConnectionState = "idle";
   private sessionStarted = false;
@@ -17,14 +16,13 @@ export class NexaconChatWidget {
   constructor(options: ChatOptions) {
     this.options = {
       widgetId: options.widgetId,
-      baseUrl: options.baseUrl || DEFAULT_BASE_URL,
       visitorName: options.visitorName || "",
       visitorEmail: options.visitorEmail || "",
       visitorId: options.visitorId || crypto.randomUUID(),
       preChatForm: options.preChatForm ?? !options.visitorName,
     };
 
-    this.api = new ApiClient(this.options.baseUrl);
+    this.api = new ApiClient();
     this.ui = new WidgetUI();
 
     this.ui.onSend = (text) => this.sendMessage(text);
@@ -94,7 +92,7 @@ export class NexaconChatWidget {
   }
 
   private connectXmpp(jid: string, token: string, roomJid: string): void {
-    this.xmpp = new XmppClient({
+    this.xmpp = new nxClient({
       wsUrl: NXWS,
       jid,
       password: token,
@@ -188,11 +186,10 @@ function autoInit(): void {
     const widgetId = script.getAttribute("data-widget-id");
     if (!widgetId) return;
 
-    const baseUrl = script.getAttribute("data-base-url") || undefined;
     const visitorName = script.getAttribute("data-visitor-name") || undefined;
     const visitorEmail = script.getAttribute("data-visitor-email") || undefined;
 
-    init({ widgetId, baseUrl, visitorName, visitorEmail });
+    init({ widgetId, visitorName, visitorEmail });
   });
 }
 

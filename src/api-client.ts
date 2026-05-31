@@ -1,15 +1,17 @@
 import { GuestSession, WidgetConfig } from "./types";
 
+const BASE_URL = "https://nxservice.quantumvision-tech.com/api/v1.0";
+
 export class ApiClient {
   private baseUrl: string;
 
-  constructor(baseUrl: string) {
-    this.baseUrl = baseUrl.replace(/\/$/, "");
+  constructor(baseUrl?: string) {
+    this.baseUrl = (baseUrl || BASE_URL).replace(/\/$/, "");
   }
 
   async getWidgetConfig(widgetId: string): Promise<WidgetConfig> {
     const res = await fetch(
-      `${this.baseUrl}/live-chat/widget/${widgetId}/config/`
+      `${this.baseUrl}/live-chat/widget/${widgetId}/config/`,
     );
     if (!res.ok) {
       throw new Error(`Failed to load widget config (${res.status})`);
@@ -23,7 +25,7 @@ export class ApiClient {
       visitorId?: string;
       name?: string;
       email?: string;
-    }
+    },
   ): Promise<GuestSession> {
     const body = {
       visitor_id: options.visitorId || crypto.randomUUID(),
@@ -38,13 +40,13 @@ export class ApiClient {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
-      }
+      },
     );
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
       throw new Error(
-        `Guest session failed (${res.status}): ${JSON.stringify(err)}`
+        `Guest session failed (${res.status}): ${JSON.stringify(err)}`,
       );
     }
 

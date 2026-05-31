@@ -1,6 +1,5 @@
 export interface ChatOptions {
   widgetId: string;
-  baseUrl?: string;
   visitorName?: string;
   visitorEmail?: string;
   visitorId?: string;

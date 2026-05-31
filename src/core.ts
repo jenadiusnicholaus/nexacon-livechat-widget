@@ -1,3 +1,3 @@
 export * from "./types";
 export { ApiClient } from "./api-client";
-export { XmppClient } from "./xmpp-client";
+export { nxClient } from "./xmpp-client";
