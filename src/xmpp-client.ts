@@ -24,7 +24,10 @@ export class nxClient {
     password: string;
     roomJid: string;
   }) {
-    this.wsUrl = options.wsUrl;
+    // Convert HTTPS to WSS for WebSocket connection
+    this.wsUrl = options.wsUrl
+      .replace(/^https:\/\//, "wss://")
+      .replace(/^http:\/\//, "ws://");
     this.jid = options.jid;
     this.password = options.password;
     this.domain = options.jid.split("@")[1] || "nexacon.cloud";

@@ -95,9 +95,10 @@ const CSS = `
 
 #nx-prechat-form {
   position: absolute; inset: 0; z-index: 10;
-  background: #fff; display: flex; flex-direction: column;
+  background: #fff; display: none; flex-direction: column;
   justify-content: center; padding: 28px 24px; gap: 14px;
 }
+#nx-prechat-form.nx-visible { display: flex; }
 #nx-prechat-form h4 { margin: 0 0 4px; font-size: 16px; color: #222; }
 #nx-prechat-form p { margin: 0; font-size: 13px; color: #777; }
 #nx-prechat-form input {
@@ -336,7 +337,6 @@ export class WidgetUI {
   private createPreChatForm(): HTMLElement {
     const form = document.createElement("div");
     form.id = "nx-prechat-form";
-    form.style.display = "none";
 
     const title = document.createElement("h4");
     title.textContent = "Start a conversation";
@@ -381,11 +381,11 @@ export class WidgetUI {
 
   showPreChatForm(onSubmit: (name: string, email: string) => void): void {
     this._preChatSubmit = onSubmit;
-    this.preChatFormEl.style.display = "flex";
+    this.preChatFormEl.classList.add("nx-visible");
     (document.getElementById("nx-prechat-name") as HTMLInputElement)?.focus();
   }
 
   hidePreChatForm(): void {
-    this.preChatFormEl.style.display = "none";
+    this.preChatFormEl.classList.remove("nx-visible");
   }
 }

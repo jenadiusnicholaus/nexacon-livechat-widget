@@ -3,8 +3,6 @@ import { nxClient } from "./xmpp-client";
 import { WidgetUI } from "./widget-ui";
 import { ChatMessage, ChatOptions, ConnectionState } from "./types";
 
-const NXWS = "wss://nxservice.quantumvision-tech.com/nx-websocket/";
-
 export class NexaconChatWidget {
   private options: Required<ChatOptions>;
   private api: ApiClient;
@@ -82,7 +80,12 @@ export class NexaconChatWidget {
         session.routed_to === "agent" ? handlerName : "Support Bot",
       );
 
-      this.connectXmpp(session.session_id, session.token, session.channel);
+      this.connectXmpp(
+        session.session_id,
+        session.token,
+        session.channel,
+        session.ws_url,
+      );
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       this.setState("error");
@@ -91,9 +94,14 @@ export class NexaconChatWidget {
     }
   }
 
-  private connectXmpp(jid: string, token: string, roomJid: string): void {
+  private connectXmpp(
+    jid: string,
+    token: string,
+    roomJid: string,
+    wsUrl: string,
+  ): void {
     this.xmpp = new nxClient({
-      wsUrl: NXWS,
+      wsUrl: wsUrl,
       jid,
       password: token,
       roomJid,

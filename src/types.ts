@@ -17,6 +17,7 @@ export interface GuestSession {
   session_id: string;
   token: string;
   channel: string;
+  ws_url: string;
   expires_in: number;
   ticket_id: number;
   routed_to: "agent" | "bot";
