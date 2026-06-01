@@ -38,31 +38,43 @@ export class nxClient {
     try {
       this.connection = new Strophe.Connection(this.wsUrl);
 
-      this.connection.connect(this.jid, this.password, (status: number) => {
-        switch (status) {
-          case Strophe.Status.CONNECTING:
-            this.onStateChange("error", "Connecting...");
-            break;
-          case Strophe.Status.CONNECTED:
-            this.isConnected = true;
-            this.onConnected();
-            break;
-          case Strophe.Status.AUTHFAIL:
-            this.onStateChange("error", "Authentication failed");
-            break;
-          case Strophe.Status.CONNFAIL:
-            this.onStateChange("error", "Connection failed");
-            break;
-          case Strophe.Status.DISCONNECTED:
-            this.isConnected = false;
-            this.onStateChange("disconnected");
-            break;
-          default:
-            // Other statuses
-            break;
-        }
-      });
+      // Add resource to JID (like /widget)
+      const jidWithResource = `${this.jid}/widget`;
+
+      console.log("[XMPP] Connecting to:", this.wsUrl);
+      console.log("[XMPP] JID:", jidWithResource);
+
+      this.connection.connect(
+        jidWithResource,
+        this.password,
+        (status: number) => {
+          console.log("[XMPP] Status:", status);
+          switch (status) {
+            case Strophe.Status.CONNECTING:
+              this.onStateChange("error", "Connecting...");
+              break;
+            case Strophe.Status.CONNECTED:
+              this.isConnected = true;
+              this.onConnected();
+              break;
+            case Strophe.Status.AUTHFAIL:
+              this.onStateChange("error", "Authentication failed");
+              break;
+            case Strophe.Status.CONNFAIL:
+              this.onStateChange("error", "Connection failed");
+              break;
+            case Strophe.Status.DISCONNECTED:
+              this.isConnected = false;
+              this.onStateChange("disconnected");
+              break;
+            default:
+              console.log("[XMPP] Other status:", status);
+              break;
+          }
+        },
+      );
     } catch (error) {
+      console.error("[XMPP] Connection error:", error);
       this.onStateChange("error", "Failed to initialize connection");
     }
   }
