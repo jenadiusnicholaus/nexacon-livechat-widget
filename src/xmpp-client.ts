@@ -1,3 +1,5 @@
+import { Strophe, $msg, $pres } from "strophe.js";
+
 export type MessageHandler = (from: string, body: string) => void;
 export type StateHandler = (
   state: "connected" | "disconnected" | "error",
@@ -5,15 +7,13 @@ export type StateHandler = (
 ) => void;
 
 export class nxClient {
-  private ws: WebSocket | null = null;
+  private connection: any = null;
   private wsUrl: string;
   private jid: string;
   private password: string;
-  private domain: string;
   private roomJid: string;
   private nick: string;
-  private streamOpened = false;
-  private authenticated = false;
+  private isConnected = false;
 
   onMessage: MessageHandler = () => {};
   onStateChange: StateHandler = () => {};
@@ -30,157 +30,109 @@ export class nxClient {
       .replace(/^http:\/\//, "ws://");
     this.jid = options.jid;
     this.password = options.password;
-    this.domain = options.jid.split("@")[1] || "nexacon.cloud";
     this.roomJid = options.roomJid;
     this.nick = options.jid.split("@")[0];
   }
 
   connect(): void {
     try {
-      this.ws = new WebSocket(this.wsUrl, "xmpp");
-    } catch {
-      this.onStateChange("error", "WebSocket not supported or URL invalid");
-      return;
+      this.connection = new Strophe.Connection(this.wsUrl);
+
+      this.connection.connect(this.jid, this.password, (status: number) => {
+        switch (status) {
+          case Strophe.Status.CONNECTING:
+            this.onStateChange("error", "Connecting...");
+            break;
+          case Strophe.Status.CONNECTED:
+            this.isConnected = true;
+            this.onConnected();
+            break;
+          case Strophe.Status.AUTHFAIL:
+            this.onStateChange("error", "Authentication failed");
+            break;
+          case Strophe.Status.CONNFAIL:
+            this.onStateChange("error", "Connection failed");
+            break;
+          case Strophe.Status.DISCONNECTED:
+            this.isConnected = false;
+            this.onStateChange("disconnected");
+            break;
+          default:
+            // Other statuses
+            break;
+        }
+      });
+    } catch (error) {
+      this.onStateChange("error", "Failed to initialize connection");
+    }
+  }
+
+  private onConnected(): void {
+    // Send initial presence
+    this.connection.send($pres());
+
+    // Add message handler
+    this.connection.addHandler(
+      (stanza: any) => this.handleMessage(stanza),
+      null,
+      "message",
+      "groupchat",
+      this.roomJid,
+    );
+
+    // Join the MUC room
+    this.joinRoom();
+
+    this.onStateChange("connected");
+  }
+
+  private handleMessage(stanza: any): boolean {
+    const from = stanza.getAttribute("from");
+    const body = stanza.querySelector("body");
+
+    if (body) {
+      const bodyText = Strophe.getText(body);
+      const senderNick = from.split("/")[1] || from;
+
+      // Don't handle messages from self
+      if (senderNick !== this.nick) {
+        this.onMessage(from, bodyText);
+      }
     }
 
-    this.ws.onopen = () => {
-      this.streamOpened = false;
-      this.authenticated = false;
-      this.openStream();
-    };
-
-    this.ws.onmessage = (e: MessageEvent) => {
-      this.handleData(e.data as string);
-    };
-
-    this.ws.onerror = () => {
-      this.onStateChange("error", "WebSocket connection error");
-    };
-
-    this.ws.onclose = () => {
-      this.onStateChange("disconnected");
-    };
+    return true;
   }
 
   disconnect(): void {
-    this.send("</stream:stream>");
-    this.ws?.close();
+    if (this.connection) {
+      this.connection.disconnect();
+      this.connection = null;
+      this.isConnected = false;
+    }
   }
 
   sendMessage(body: string): void {
-    const escaped = this.escapeXml(body);
-    this.send(
-      `<message to="${this.roomJid}" type="groupchat">` +
-        `<body>${escaped}</body>` +
-        `</message>`,
-    );
-  }
-
-  private openStream(): void {
-    this.send(
-      `<?xml version="1.0"?>` +
-        `<stream:stream xmlns="jabber:client" ` +
-        `xmlns:stream="http://etherx.jabber.org/streams" ` +
-        `to="${this.domain}" version="1.0" xml:lang="en">`,
-    );
-  }
-
-  private handleData(data: string): void {
-    if (!this.authenticated) {
-      if (data.includes("mechanism") && data.includes("PLAIN")) {
-        this.authenticate();
-        return;
-      }
-      if (data.includes("<success")) {
-        this.authenticated = true;
-        this.streamOpened = false;
-        this.openStream();
-        return;
-      }
-      if (data.includes("<failure")) {
-        this.onStateChange("error", "XMPP authentication failed");
-        return;
-      }
-    }
-
-    if (this.authenticated && !this.streamOpened) {
-      if (data.includes("urn:ietf:params:xml:ns:xmpp-bind")) {
-        this.streamOpened = true;
-        this.bindResource();
-        return;
-      }
-    }
-
-    if (
-      data.includes("<iq") &&
-      data.includes('type="result"') &&
-      data.includes("bind")
-    ) {
-      this.joinRoom();
-      this.onStateChange("connected");
+    if (!this.isConnected || !this.connection) {
       return;
     }
 
-    if (data.includes("<message")) {
-      this.parseMessage(data);
-    }
-  }
-
-  private authenticate(): void {
-    const user = this.jid.split("@")[0];
-    const authStr = btoa(`\0${user}\0${this.password}`);
-    this.send(
-      `<auth xmlns="urn:ietf:params:xml:ns:xmpp-sasl" mechanism="PLAIN">` +
-        `${authStr}</auth>`,
-    );
-  }
-
-  private bindResource(): void {
-    this.send(
-      `<iq type="set" id="bind1">` +
-        `<bind xmlns="urn:ietf:params:xml:ns:xmpp-bind">` +
-        `<resource>widget</resource>` +
-        `</bind></iq>`,
+    this.connection.send(
+      $msg({
+        to: this.roomJid,
+        type: "groupchat",
+      })
+        .c("body")
+        .t(body),
     );
   }
 
   private joinRoom(): void {
-    this.send(
-      `<presence to="${this.roomJid}/${this.nick}">` +
-        `<x xmlns="http://jabber.org/protocol/muc"/>` +
-        `</presence>`,
+    if (!this.connection) return;
+
+    this.connection.send(
+      $pres({
+        to: `${this.roomJid}/${this.nick}`,
+      }).c("x", { xmlns: "http://jabber.org/protocol/muc" }),
     );
-  }
-
-  private parseMessage(data: string): void {
-    const fromMatch = data.match(/from="([^"]+)"/);
-    const bodyMatch = data.match(/<body[^>]*>([^<]*)<\/body>/);
-    const typeMatch = data.match(/type="([^"]+)"/);
-
-    if (!fromMatch || !bodyMatch) return;
-    if (typeMatch?.[1] === "error") return;
-
-    const from = fromMatch[1];
-    const body = bodyMatch[1];
-    const senderNick = from.split("/")[1] || from;
-
-    if (senderNick !== this.nick) {
-      this.onMessage(from, body);
-    }
-  }
-
-  private send(stanza: string): void {
-    if (this.ws?.readyState === WebSocket.OPEN) {
-      this.ws.send(stanza);
-    }
-  }
-
-  private escapeXml(text: string): string {
-    return text
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&apos;");
   }
 }

@@ -47,5 +47,8 @@
   ],
   "engines": {
     "node": ">=16.0.0"
+  },
+  "dependencies": {
+    "strophe.js": "^4.0.0-rc0"
   }
 }
