@@ -1,6 +1,6 @@
 import { GuestSession, WidgetConfig } from "./types";
 
-const BASE_URL = "http://localhost:8001/api/v1.0";
+const BASE_URL = "https://nxservice.quantumvision-tech.com/api/v1.0";
 
 export class ApiClient {
   private baseUrl: string;
