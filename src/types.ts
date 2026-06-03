@@ -4,6 +4,7 @@ export interface ChatOptions {
   visitorEmail?: string;
   visitorId?: string;
   preChatForm?: boolean; // show name/email form before connecting (default: true if no visitorName)
+  apiUrl?: string; // custom API base URL
 }
 
 export interface WidgetConfig {

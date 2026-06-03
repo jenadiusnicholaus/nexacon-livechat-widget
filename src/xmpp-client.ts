@@ -36,6 +36,7 @@ export class nxClient {
 
   connect(): void {
     try {
+      console.log("[XMPP] Raw wsUrl from constructor:", this.wsUrl);
       this.connection = new Strophe.Connection(this.wsUrl);
 
       // Add resource to JID (like /widget)
@@ -43,6 +44,7 @@ export class nxClient {
 
       console.log("[XMPP] Connecting to:", this.wsUrl);
       console.log("[XMPP] JID:", jidWithResource);
+      console.log("[XMPP] Connection object:", this.connection);
 
       this.connection.connect(
         jidWithResource,
