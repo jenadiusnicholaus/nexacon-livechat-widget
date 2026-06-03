@@ -162,4 +162,40 @@ export class ApiClient {
       jid: string;
     }>;
   }
+
+  async addRoomMember(
+    nxToken: string,
+    roomJid: string,
+    nxid: string,
+    affiliation: "member" | "admin" | "owner" = "member",
+  ): Promise<{
+    success: boolean;
+    message?: string;
+  }> {
+    const res = await fetch(`${this.baseUrl}/nx/groups/${roomJid}/members/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${nxToken}`,
+        "API-Key": this.apiKey,
+        "Secret-Key": this.secretKey,
+      },
+      body: JSON.stringify({
+        nxid,
+        affiliation,
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(
+        `Add room member failed (${res.status}): ${JSON.stringify(err)}`,
+      );
+    }
+
+    return res.json() as Promise<{
+      success: boolean;
+      message?: string;
+    }>;
+  }
 }

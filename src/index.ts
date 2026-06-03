@@ -70,6 +70,39 @@ export class NexaconChatWidget {
                 );
                 sessionStorage.setItem("nexacon_room_jid", roomData.jid);
                 console.log("Room created:", roomData.jid);
+
+                // Add guest as room member
+                try {
+                  const guestNxid = nxTokenData.jid.split("@")[0]; // Extract nxid from JID
+                  await this.api.addRoomMember(
+                    nxTokenData.nx_token,
+                    roomData.jid,
+                    guestNxid,
+                    "member",
+                  );
+                  console.log("Guest added to room:", guestNxid);
+                } catch (memberErr) {
+                  console.error("Failed to add guest to room:", memberErr);
+                }
+
+                // Add bot as room member (if bot is configured)
+                try {
+                  const config = await this.api.getWidgetConfig(
+                    this.options.widgetId,
+                  );
+                  if (config.bot?.bot_jid) {
+                    const botNxid = config.bot.bot_jid.split("@")[0];
+                    await this.api.addRoomMember(
+                      nxTokenData.nx_token,
+                      roomData.jid,
+                      botNxid,
+                      "admin",
+                    );
+                    console.log("Bot added to room:", botNxid);
+                  }
+                } catch (botErr) {
+                  console.error("Failed to add bot to room:", botErr);
+                }
               } catch (roomErr) {
                 console.error("Failed to create room:", roomErr);
                 // Continue without room - will use direct messaging
