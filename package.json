@@ -1,6 +1,6 @@
 {
   "name": "nexacon-livechat-widget",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "Embeddable live chat widget for Nexacon — drop a single script tag into any website",
   "main": "dist/index.js",
   "module": "dist/index.js",
