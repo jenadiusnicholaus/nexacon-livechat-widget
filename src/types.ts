@@ -5,6 +5,8 @@ export interface ChatOptions {
   visitorId?: string;
   preChatForm?: boolean; // show name/email form before connecting (default: true if no visitorName)
   apiUrl?: string; // custom API base URL
+  apiKey: string; // API key for nxm-token endpoint (required)
+  secretKey: string; // Secret key for nxm-token endpoint (required)
 }
 
 export interface WidgetConfig {

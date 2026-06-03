@@ -4,9 +4,13 @@ const BASE_URL = "https://nxservice.quantumvision-tech.com/api/v1.0";
 
 export class ApiClient {
   private baseUrl: string;
+  private apiKey: string;
+  private secretKey: string;
 
-  constructor(baseUrl?: string) {
+  constructor(apiKey: string, secretKey: string, baseUrl?: string) {
     this.baseUrl = (baseUrl || BASE_URL).replace(/\/$/, "");
+    this.apiKey = apiKey;
+    this.secretKey = secretKey;
   }
 
   async getWidgetConfig(widgetId: string): Promise<WidgetConfig> {
@@ -87,10 +91,8 @@ export class ApiClient {
   }> {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
-      "x-api-key":
-        "ab7cc6d081e96a40982d4efad3701bce011de730527c02b3c05f209cbb3d2279",
-      "x-Secret-key":
-        "138ada11283b0e7756daa0481008cbc06e352f9b30f9c0889573c28ae99566a2",
+      "x-api-key": this.apiKey,
+      "x-Secret-key": this.secretKey,
     };
 
     if (djangoToken) {

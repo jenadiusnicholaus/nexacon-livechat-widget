@@ -28,9 +28,11 @@ export class NexaconChatWidget {
       visitorId: options.visitorId || crypto.randomUUID(),
       preChatForm: options.preChatForm ?? !options.visitorName,
       apiUrl: options.apiUrl,
+      apiKey: options.apiKey,
+      secretKey: options.secretKey,
     };
 
-    this.api = new ApiClient(options.apiUrl);
+    this.api = new ApiClient(options.apiKey, options.secretKey, options.apiUrl);
     this.ui = new WidgetUI();
 
     this.ui.onSend = (text) => this.sendMessage(text);
@@ -330,8 +332,10 @@ function autoInit(): void {
     const visitorName = script.getAttribute("data-visitor-name") || undefined;
     const visitorEmail = script.getAttribute("data-visitor-email") || undefined;
     const apiUrl = script.getAttribute("data-api-url") || undefined;
+    const apiKey = script.getAttribute("data-api-key") || "";
+    const secretKey = script.getAttribute("data-secret-key") || "";
 
-    init({ widgetId, visitorName, visitorEmail, apiUrl });
+    init({ widgetId, visitorName, visitorEmail, apiUrl, apiKey, secretKey });
   });
 }
 
