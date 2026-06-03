@@ -37,7 +37,7 @@ const CSS = `
 }
 
 #nx-chat-header {
-  padding: 18px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 16px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: #fff;
   display: flex; align-items: center; justify-content: space-between;
   flex-shrink: 0;
@@ -56,13 +56,28 @@ const CSS = `
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
-#nx-chat-header .nx-title { font-weight: 700; font-size: 16px; position: relative; z-index: 1; }
-#nx-chat-header .nx-sub { font-size: 12px; opacity: 0.9; margin-top: 4px; position: relative; z-index: 1; }
+#nx-chat-header .nx-info {
+  display: flex; align-items: center; gap: 12px; position: relative; z-index: 1; flex: 1;
+}
+#nx-chat-header .nx-avatar {
+  width: 42px; height: 42px; border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; flex-shrink: 0;
+}
+#nx-chat-header .nx-avatar img {
+  width: 100%; height: 100%; object-fit: cover;
+}
+#nx-chat-header .nx-avatar .nx-avatar-placeholder {
+  font-size: 18px; font-weight: 600;
+}
+#nx-chat-header .nx-title { font-weight: 700; font-size: 16px; }
+#nx-chat-header .nx-sub { font-size: 12px; opacity: 0.9; margin-top: 2px; }
 #nx-chat-header button {
   background: rgba(255,255,255,0.2); border: none; color: #fff; cursor: pointer;
   font-size: 20px; line-height: 1; padding: 8px; border-radius: 50%;
   transition: background 0.2s, transform 0.2s;
-  position: relative; z-index: 1;
+  position: relative; z-index: 1; flex-shrink: 0;
 }
 #nx-chat-header button:hover { background: rgba(255,255,255,0.3); transform: rotate(90deg); }
 
@@ -258,6 +273,17 @@ export class WidgetUI {
     this.headerTitle.textContent = name;
   }
 
+  setHandlerAvatar(avatarUrl: string): void {
+    const avatarEl = document.getElementById("nx-header-avatar");
+    if (!avatarEl) return;
+
+    if (avatarUrl) {
+      avatarEl.innerHTML = `<img src="${avatarUrl}" alt="Avatar" />`;
+    } else {
+      avatarEl.innerHTML = `<div class="nx-avatar-placeholder">🤖</div>`;
+    }
+  }
+
   setStatus(text: string): void {
     this.headerSub.textContent = text;
   }
@@ -375,14 +401,28 @@ export class WidgetUI {
     header.style.background = this.primaryColor;
 
     const info = document.createElement("div");
+    info.className = "nx-info";
+
+    const avatar = document.createElement("div");
+    avatar.className = "nx-avatar";
+    avatar.id = "nx-header-avatar";
+    const avatarPlaceholder = document.createElement("div");
+    avatarPlaceholder.className = "nx-avatar-placeholder";
+    avatarPlaceholder.textContent = "🤖";
+    avatar.appendChild(avatarPlaceholder);
+
+    const textInfo = document.createElement("div");
     this.headerTitle = document.createElement("div");
     this.headerTitle.className = "nx-title";
     this.headerTitle.textContent = "Support";
     this.headerSub = document.createElement("div");
     this.headerSub.className = "nx-sub";
     this.headerSub.textContent = "● Connecting...";
-    info.appendChild(this.headerTitle);
-    info.appendChild(this.headerSub);
+    textInfo.appendChild(this.headerTitle);
+    textInfo.appendChild(this.headerSub);
+
+    info.appendChild(avatar);
+    info.appendChild(textInfo);
 
     const closeBtn = document.createElement("button");
     closeBtn.type = "button";

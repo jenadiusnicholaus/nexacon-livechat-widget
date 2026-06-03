@@ -16,6 +16,7 @@ export class NexaconChatWidget {
   private state: ConnectionState = "idle";
   private sessionStarted = false;
   private currentSession: GuestSession | null = null;
+  private botName: string | null = null;
   private readonly STORAGE_KEY = "nexacon_visitor_session";
   private readonly STORAGE_EXPIRY_DAYS = 2;
 
@@ -63,9 +64,12 @@ export class NexaconChatWidget {
   async init(): Promise<void> {
     try {
       const config = await this.api.getWidgetConfig(this.options.widgetId);
+      this.botName = config.bot?.bot_name || null;
       this.ui.mount();
       if (config.primary_color) this.ui.setColor(config.primary_color);
       if (config.bot?.bot_name) this.ui.setHandlerName(config.bot.bot_name);
+      if (config.bot_avatar_url)
+        this.ui.setHandlerAvatar(config.bot_avatar_url);
     } catch {
       this.ui.mount();
     }
@@ -135,9 +139,15 @@ export class NexaconChatWidget {
 
       const handlerName =
         session.handler.split("@")[0].replace(/-/g, " ") || "Support";
-      this.ui.setHandlerName(
-        session.routed_to === "agent" ? handlerName : "Support Bot",
-      );
+      if (session.routed_to === "agent") {
+        this.ui.setHandlerName(handlerName);
+        this.ui.setHandlerAvatar(""); // Reset to default emoji for human agent
+      } else {
+        // Keep bot name from config if available
+        if (this.botName) {
+          this.ui.setHandlerName(this.botName);
+        }
+      }
 
       this.connectXmpp(
         session.session_id,

@@ -11,7 +11,19 @@ export interface WidgetConfig {
   widget_id: string;
   welcome_message: string;
   primary_color: string;
-  bot?: { bot_name: string; bot_jid: string };
+  bot_avatar_url: string;
+  bot?: {
+    id: number;
+    bot_name: string;
+    ai_model: string;
+    ai_model_endpoint: string | null;
+    personality: string;
+    training_data: string;
+    is_active: boolean;
+    created_at: string;
+    updated_at: string;
+    bot_jid: string;
+  };
 }
 
 export interface GuestSession {
