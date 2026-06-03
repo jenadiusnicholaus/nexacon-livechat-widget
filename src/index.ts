@@ -1,7 +1,12 @@
 import { ApiClient } from "./api-client";
 import { nxClient } from "./xmpp-client";
 import { WidgetUI } from "./widget-ui";
-import { ChatMessage, ChatOptions, ConnectionState } from "./types";
+import {
+  ChatMessage,
+  ChatOptions,
+  ConnectionState,
+  GuestSession,
+} from "./types";
 
 export class NexaconChatWidget {
   private options: ChatOptions;
@@ -10,6 +15,9 @@ export class NexaconChatWidget {
   private ui: WidgetUI;
   private state: ConnectionState = "idle";
   private sessionStarted = false;
+  private currentSession: GuestSession | null = null;
+  private readonly STORAGE_KEY = "nexacon_visitor_session";
+  private readonly STORAGE_EXPIRY_DAYS = 2;
 
   constructor(options: ChatOptions) {
     this.options = {
@@ -29,7 +37,15 @@ export class NexaconChatWidget {
     this.ui.onOpen = () => {
       if (!this.sessionStarted) {
         this.sessionStarted = true;
-        if (this.options.preChatForm) {
+
+        // Try to load from storage first
+        const stored = this.loadSessionFromStorage();
+        if (stored) {
+          this.options.visitorName = stored.visitorName;
+          this.options.visitorEmail = stored.visitorEmail;
+          this.options.visitorId = stored.visitorId;
+          this.startSession(stored.session);
+        } else if (this.options.preChatForm) {
           this.ui.showPreChatForm((name, email) => {
             this.options.visitorName = name || "Visitor";
             this.options.visitorEmail = email;
@@ -55,17 +71,49 @@ export class NexaconChatWidget {
     }
   }
 
-  private async startSession(): Promise<void> {
+  private async startSession(existingSession?: GuestSession): Promise<void> {
     this.setState("connecting");
     this.ui.setStatus("● Connecting...");
     this.ui.enableInput(false);
 
     try {
-      const session = await this.api.createGuestSession(this.options.widgetId, {
-        visitorId: this.options.visitorId,
-        name: this.options.visitorName,
-        email: this.options.visitorEmail,
-      });
+      const session =
+        existingSession ||
+        (await this.api.createGuestSession(this.options.widgetId, {
+          visitorId: this.options.visitorId,
+          name: this.options.visitorName,
+          email: this.options.visitorEmail,
+        }));
+
+      this.currentSession = session;
+
+      // Save to storage if it's a new session
+      if (!existingSession) {
+        this.saveSessionToStorage(session);
+      } else {
+        // Fetch chat history for returning visitor
+        try {
+          const history = await this.api.fetchChatHistory(
+            session.session_id,
+            session.token,
+            50,
+          );
+          // Display history messages
+          history.forEach((msg: any) => {
+            const chatMsg: ChatMessage = {
+              id: crypto.randomUUID(),
+              from: msg.from === session.session_id ? "me" : msg.from,
+              body: msg.body,
+              timestamp: new Date(msg.timestamp || Date.now()),
+              type: msg.from === session.session_id ? "visitor" : "agent",
+            };
+            this.ui.addMessage(chatMsg);
+          });
+        } catch (historyErr) {
+          // Ignore history fetch errors, continue with session
+          console.log("Could not fetch chat history:", historyErr);
+        }
+      }
 
       this.addSystemMessage(
         session.welcome_message || "Welcome! How can we help?",
@@ -181,6 +229,48 @@ export class NexaconChatWidget {
 
   private setState(state: ConnectionState): void {
     this.state = state;
+  }
+
+  private saveSessionToStorage(session: GuestSession): void {
+    const data = {
+      session,
+      visitorName: this.options.visitorName,
+      visitorEmail: this.options.visitorEmail,
+      visitorId: this.options.visitorId,
+      expiry: Date.now() + this.STORAGE_EXPIRY_DAYS * 24 * 60 * 60 * 1000,
+    };
+    sessionStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
+  }
+
+  private loadSessionFromStorage(): {
+    session: GuestSession;
+    visitorName: string;
+    visitorEmail: string;
+    visitorId: string;
+  } | null {
+    const stored = sessionStorage.getItem(this.STORAGE_KEY);
+    if (!stored) return null;
+
+    try {
+      const data = JSON.parse(stored);
+      if (Date.now() > data.expiry) {
+        sessionStorage.removeItem(this.STORAGE_KEY);
+        return null;
+      }
+      return {
+        session: data.session,
+        visitorName: data.visitorName,
+        visitorEmail: data.visitorEmail,
+        visitorId: data.visitorId,
+      };
+    } catch {
+      sessionStorage.removeItem(this.STORAGE_KEY);
+      return null;
+    }
+  }
+
+  private clearSessionFromStorage(): void {
+    sessionStorage.removeItem(this.STORAGE_KEY);
   }
 
   destroy(): void {

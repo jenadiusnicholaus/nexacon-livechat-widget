@@ -147,9 +147,15 @@ const CSS = `
 }
 
 #nx-ai-suggestions {
-  display: flex; gap: 8px; flex-wrap: wrap;
+  display: flex; gap: 8px; flex-wrap: nowrap;
   padding: 0 20px 12px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
 }
+#nx-ai-suggestions::-webkit-scrollbar { height: 4px; }
+#nx-ai-suggestions::-webkit-scrollbar-track { background: transparent; }
+#nx-ai-suggestions::-webkit-scrollbar-thumb { background: #ddd; border-radius: 2px; }
 .nx-suggestion {
   background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
   border: 1px solid rgba(102, 126, 234, 0.2);
@@ -160,6 +166,8 @@ const CSS = `
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
+  flex-shrink: 0;
+  scroll-snap-align: start;
 }
 .nx-suggestion:hover {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -284,6 +292,13 @@ export class WidgetUI {
 
     if (msg.type === "visitor" && msg.body) {
       this.showTyping(true);
+      // Auto-hide typing indicator after 10 seconds if no response
+      setTimeout(() => this.showTyping(false), 10000);
+    }
+
+    // Hide typing indicator when agent/bot responds
+    if (msg.type === "agent" || msg.type === "bot") {
+      this.showTyping(false);
     }
   }
 
