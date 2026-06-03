@@ -1,6 +1,6 @@
 import { GuestSession, WidgetConfig } from "./types";
 
-const BASE_URL = "https://nxservice.quantumvision-tech.com/api/v1.0";
+const BASE_URL = "http://localhost:8001/api/v1.0";
 
 export class ApiClient {
   private baseUrl: string;
@@ -51,5 +51,27 @@ export class ApiClient {
     }
 
     return res.json() as Promise<GuestSession>;
+  }
+
+  async fetchChatHistory(
+    peer: string,
+    nxToken: string,
+    limit: number = 50,
+  ): Promise<any[]> {
+    const res = await fetch(
+      `${this.baseUrl}/nx/history/?limit=${limit}&peer=${encodeURIComponent(peer)}`,
+      {
+        method: "GET",
+        headers: {
+          "X-NX-Token": nxToken,
+        },
+      },
+    );
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch chat history (${res.status})`);
+    }
+
+    return res.json() as Promise<any[]>;
   }
 }

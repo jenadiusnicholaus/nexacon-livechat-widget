@@ -4,7 +4,7 @@ import { WidgetUI } from "./widget-ui";
 import { ChatMessage, ChatOptions, ConnectionState } from "./types";
 
 export class NexaconChatWidget {
-  private options: Required<ChatOptions>;
+  private options: ChatOptions;
   private api: ApiClient;
   private xmpp: nxClient | null = null;
   private ui: WidgetUI;
@@ -18,9 +18,10 @@ export class NexaconChatWidget {
       visitorEmail: options.visitorEmail || "",
       visitorId: options.visitorId || crypto.randomUUID(),
       preChatForm: options.preChatForm ?? !options.visitorName,
+      apiUrl: options.apiUrl,
     };
 
-    this.api = new ApiClient();
+    this.api = new ApiClient(options.apiUrl);
     this.ui = new WidgetUI();
 
     this.ui.onSend = (text) => this.sendMessage(text);
@@ -64,6 +65,29 @@ export class NexaconChatWidget {
         name: this.options.visitorName,
         email: this.options.visitorEmail,
       });
+
+      // Fetch chat history if this is a returning visitor
+      try {
+        const history = await this.api.fetchChatHistory(
+          session.session_id,
+          session.token,
+          50,
+        );
+        // Display history messages
+        history.forEach((msg: any) => {
+          const chatMsg: ChatMessage = {
+            id: crypto.randomUUID(),
+            from: msg.from === session.session_id ? "me" : msg.from,
+            body: msg.body,
+            timestamp: new Date(msg.timestamp || Date.now()),
+            type: msg.from === session.session_id ? "visitor" : "agent",
+          };
+          this.ui.addMessage(chatMsg);
+        });
+      } catch (historyErr) {
+        // Ignore history fetch errors, continue with session
+        console.log("Could not fetch chat history:", historyErr);
+      }
 
       this.addSystemMessage(
         session.welcome_message || "Welcome! How can we help?",
@@ -196,8 +220,9 @@ function autoInit(): void {
 
     const visitorName = script.getAttribute("data-visitor-name") || undefined;
     const visitorEmail = script.getAttribute("data-visitor-email") || undefined;
+    const apiUrl = script.getAttribute("data-api-url") || undefined;
 
-    init({ widgetId, visitorName, visitorEmail });
+    init({ widgetId, visitorName, visitorEmail, apiUrl });
   });
 }
 
