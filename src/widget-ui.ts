@@ -4,19 +4,19 @@ const CSS = `
 #nx-chat-bubble {
   position: fixed; bottom: 24px; right: 24px; z-index: 99999;
   width: 60px; height: 60px; border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #22c55e 0%, #10b981 100%);
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 8px 24px rgba(34, 197, 94, 0.4);
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s;
   user-select: none;
   animation: nx-pulse 2s infinite;
 }
 @keyframes nx-pulse {
-  0%, 100% { box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4); }
-  50% { box-shadow: 0 8px 32px rgba(102, 126, 234, 0.6); }
+  0%, 100% { box-shadow: 0 8px 24px rgba(34, 197, 94, 0.4); }
+  50% { box-shadow: 0 8px 32px rgba(34, 197, 94, 0.6); }
 }
-#nx-chat-bubble:hover { transform: scale(1.1); box-shadow: 0 12px 36px rgba(102, 126, 234, 0.5); }
+#nx-chat-bubble:hover { transform: scale(1.1); box-shadow: 0 12px 36px rgba(34, 197, 94, 0.5); }
 #nx-chat-bubble svg { width: 30px; height: 30px; fill: #fff; }
 
 #nx-chat-window {
@@ -26,18 +26,18 @@ const CSS = `
   box-shadow: 0 20px 60px rgba(0,0,0,0.15);
   display: flex; flex-direction: column;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  font-size: 14px; background: linear-gradient(180deg, #f8f9ff 0%, #ffffff 100%);
+  font-size: 14px; background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
   transform: scale(0.9) translateY(20px); opacity: 0;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s;
   pointer-events: none;
-  border: 1px solid rgba(255,255,255,0.8);
+  border: 1px solid rgba(0,0,0,0.08);
 }
 #nx-chat-window.nx-open {
   transform: scale(1) translateY(0); opacity: 1; pointer-events: all;
 }
 
 #nx-chat-header {
-  padding: 16px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 16px 20px; background: linear-gradient(135deg, #22c55e 0%, #10b981 100%);
   color: #fff;
   display: flex; align-items: center; justify-content: space-between;
   flex-shrink: 0;
@@ -88,7 +88,7 @@ const CSS = `
 }
 #nx-chat-messages::-webkit-scrollbar { width: 6px; }
 #nx-chat-messages::-webkit-scrollbar-track { background: transparent; }
-#nx-chat-messages::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+#nx-chat-messages::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 3px; }
 .nx-msg { max-width: 80%; line-height: 1.5; animation: nx-fadeIn 0.3s ease-out; }
 @keyframes nx-fadeIn {
   from { opacity: 0; transform: translateY(10px); }
@@ -96,23 +96,23 @@ const CSS = `
 }
 .nx-msg.nx-visitor {
   align-self: flex-end;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #22c55e 0%, #10b981 100%);
   color: #fff;
   border-radius: 20px 20px 6px 20px;
   padding: 12px 16px;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
 }
 .nx-msg.nx-agent, .nx-msg.nx-bot {
   align-self: flex-start;
-  background: #fff; color: #1a1a2e;
+  background: #fff; color: #0f172a;
   border-radius: 20px 20px 20px 6px;
   padding: 12px 16px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  border: 1px solid rgba(0,0,0,0.05);
+  border: 1px solid rgba(0,0,0,0.08);
 }
 .nx-msg.nx-system {
   align-self: center; font-size: 12px;
-  color: #888; background: rgba(0,0,0,0.03); padding: 6px 12px;
+  color: #475569; background: rgba(0,0,0,0.03); padding: 6px 12px;
   border-radius: 12px;
 }
 .nx-msg .nx-sender { font-size: 11px; opacity: 0.7; margin-bottom: 4px; font-weight: 600; }
@@ -120,30 +120,30 @@ const CSS = `
 
 #nx-chat-input-area {
   display: flex; flex-direction: column; gap: 8px; padding: 16px 20px;
-  background: #fff; border-top: 1px solid rgba(0,0,0,0.06); flex-shrink: 0;
+  background: #fff; border-top: 1px solid rgba(0,0,0,0.08); flex-shrink: 0;
 }
 #nx-chat-input {
-  flex: 1; border: 2px solid #e8e8f0; border-radius: 24px;
+  flex: 1; border: 2px solid #e2e8f0; border-radius: 24px;
   padding: 12px 18px; font-size: 14px; outline: none;
   font-family: inherit;
   transition: border-color 0.2s, box-shadow 0.2s;
-  background: #f8f9ff;
+  background: #f8fafc;
 }
-#nx-chat-input:focus { border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); background: #fff; }
+#nx-chat-input:focus { border-color: #22c55e; box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1); background: #fff; }
 #nx-chat-send {
   width: 44px; height: 44px; border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #22c55e 0%, #10b981 100%);
   border: none; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; transition: transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
 }
-#nx-chat-send:hover { transform: scale(1.05); box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4); }
+#nx-chat-send:hover { transform: scale(1.05); box-shadow: 0 6px 16px rgba(34, 197, 94, 0.4); }
 #nx-chat-send svg { width: 20px; height: 20px; fill: #fff; }
 
 #nx-chat-typing {
   align-self: flex-start; font-size: 12px;
-  color: #888; padding: 8px 0; display: none;
+  color: #475569; padding: 8px 0; display: none;
   animation: nx-fadeIn 0.3s ease-out;
 }
 #nx-chat-typing.nx-visible { display: block; }
@@ -151,7 +151,7 @@ const CSS = `
   content: '';
   display: inline-block;
   width: 8px; height: 8px;
-  background: #667eea;
+  background: #22c55e;
   border-radius: 50%;
   margin-right: 8px;
   animation: nx-bounce 1s infinite;
@@ -170,14 +170,14 @@ const CSS = `
 }
 #nx-ai-suggestions::-webkit-scrollbar { height: 4px; }
 #nx-ai-suggestions::-webkit-scrollbar-track { background: transparent; }
-#nx-ai-suggestions::-webkit-scrollbar-thumb { background: #ddd; border-radius: 2px; }
+#nx-ai-suggestions::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 2px; }
 .nx-suggestion {
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-  border: 1px solid rgba(102, 126, 234, 0.2);
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%);
+  border: 1px solid rgba(34, 197, 94, 0.2);
   border-radius: 20px;
   padding: 8px 14px;
   font-size: 12px;
-  color: #667eea;
+  color: #22c55e;
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
@@ -185,37 +185,37 @@ const CSS = `
   scroll-snap-align: start;
 }
 .nx-suggestion:hover {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #22c55e 0%, #10b981 100%);
   color: #fff;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
 }
 
 #nx-prechat-form {
   position: absolute; inset: 0; z-index: 10;
-  background: linear-gradient(180deg, #f8f9ff 0%, #ffffff 100%);
+  background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
   display: none; flex-direction: column;
   justify-content: center; padding: 32px 28px; gap: 16px;
 }
 #nx-prechat-form.nx-visible { display: flex; }
-#nx-prechat-form h4 { margin: 0 0 6px; font-size: 18px; color: #1a1a2e; font-weight: 700; }
-#nx-prechat-form p { margin: 0; font-size: 13px; color: #666; }
+#nx-prechat-form h4 { margin: 0 0 6px; font-size: 18px; color: #0f172a; font-weight: 700; }
+#nx-prechat-form p { margin: 0; font-size: 13px; color: #475569; }
 #nx-prechat-form input {
-  border: 2px solid #e8e8f0; border-radius: 12px;
+  border: 2px solid #e2e8f0; border-radius: 12px;
   padding: 12px 16px; font-size: 14px; outline: none;
   font-family: inherit; width: 100%; box-sizing: border-box;
   transition: border-color 0.2s, box-shadow 0.2s;
-  background: #f8f9ff;
+  background: #f8fafc;
 }
-#nx-prechat-form input:focus { border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); background: #fff; }
+#nx-prechat-form input:focus { border-color: #22c55e; box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1); background: #fff; }
 #nx-prechat-form button {
   padding: 14px; border: none; border-radius: 12px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #22c55e 0%, #10b981 100%);
   color: #fff; font-size: 15px;
   font-weight: 600; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
 }
-#nx-prechat-form button:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4); }
+#nx-prechat-form button:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(34, 197, 94, 0.4); }
 
 @media (max-width: 420px) {
   #nx-chat-window { width: calc(100vw - 20px); right: 10px; bottom: 90px; height: 60vh; }
@@ -234,7 +234,7 @@ export class WidgetUI {
   private preChatFormEl!: HTMLElement;
   private aiSuggestionsEl!: HTMLElement;
   private isOpen = false;
-  private primaryColor = "#007bff";
+  private primaryColor = "#22c55e";
 
   onSend: (text: string) => void = () => {};
   onOpen: () => void = () => {};
