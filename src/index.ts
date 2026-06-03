@@ -25,6 +25,7 @@ export class NexaconChatWidget {
     this.ui = new WidgetUI();
 
     this.ui.onSend = (text) => this.sendMessage(text);
+    this.ui.onSuggestionClick = (text) => this.sendMessage(text);
     this.ui.onOpen = () => {
       if (!this.sessionStarted) {
         this.sessionStarted = true;
@@ -74,6 +75,15 @@ export class NexaconChatWidget {
           ? "You are connected to a support agent."
           : "You are connected to our AI assistant.",
       );
+
+      // Show AI suggestions
+      const suggestions = [
+        "What services do you offer?",
+        "How can I contact support?",
+        "Tell me about pricing",
+        "I need help with my account",
+      ];
+      this.ui.showAISuggestions(suggestions);
 
       const handlerName =
         session.handler.split("@")[0].replace(/-/g, " ") || "Support";
