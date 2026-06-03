@@ -89,9 +89,12 @@ export class NexaconChatWidget {
   }
 
   private async startSession(existingSession?: GuestSession): Promise<void> {
-    this.setState("connecting");
-    this.ui.setStatus("● Connecting...");
-    this.ui.enableInput(false);
+    // Only show connecting status for new sessions
+    if (!existingSession) {
+      this.setState("connecting");
+      this.ui.setStatus("● Connecting...");
+      this.ui.enableInput(false);
+    }
 
     try {
       const session =
@@ -135,23 +138,28 @@ export class NexaconChatWidget {
         }
       }
 
-      this.addSystemMessage(
-        session.welcome_message || "Welcome! How can we help?",
-      );
-      this.addSystemMessage(
-        session.routed_to === "agent"
-          ? "You are connected to a support agent."
-          : "You are connected to our AI assistant.",
-      );
+      // Only add system messages for new sessions
+      if (!existingSession) {
+        this.addSystemMessage(
+          session.welcome_message || "Welcome! How can we help?",
+        );
+        this.addSystemMessage(
+          session.routed_to === "agent"
+            ? "You are connected to a support agent."
+            : "You are connected to our AI assistant.",
+        );
+      }
 
-      // Show AI suggestions
-      const suggestions = [
-        "What services do you offer?",
-        "How can I contact support?",
-        "Tell me about pricing",
-        "I need help with my account",
-      ];
-      this.ui.showAISuggestions(suggestions);
+      // Show AI suggestions only for new sessions
+      if (!existingSession) {
+        const suggestions = [
+          "What services do you offer?",
+          "How can I contact support?",
+          "Tell me about pricing",
+          "I need help with my account",
+        ];
+        this.ui.showAISuggestions(suggestions);
+      }
 
       const handlerName =
         session.handler.split("@")[0].replace(/-/g, " ") || "Support";
