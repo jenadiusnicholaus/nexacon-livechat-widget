@@ -74,4 +74,51 @@ export class ApiClient {
 
     return res.json() as Promise<any[]>;
   }
+
+  async getNxToken(
+    username: string,
+    djangoToken?: string,
+  ): Promise<{
+    nx_token: string;
+    jid: string;
+    ws_url: string;
+    username: string;
+    expires_in: number;
+  }> {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      "x-api-key":
+        "ab7cc6d081e96a40982d4efad3701bce011de730527c02b3c05f209cbb3d2279",
+      "x-Secret-key":
+        "138ada11283b0e7756daa0481008cbc06e352f9b30f9c0889573c28ae99566a2",
+    };
+
+    if (djangoToken) {
+      headers["Authorization"] = `Bearer ${djangoToken}`;
+    }
+
+    const res = await fetch(`${this.baseUrl}/nexacon-auth/nxm-token/`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        username,
+        host: "nxservice.quantumvision-tech.com",
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(
+        `nxToken generation failed (${res.status}): ${JSON.stringify(err)}`,
+      );
+    }
+
+    return res.json() as Promise<{
+      nx_token: string;
+      jid: string;
+      ws_url: string;
+      username: string;
+      expires_in: number;
+    }>;
+  }
 }

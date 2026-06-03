@@ -47,10 +47,21 @@ export class NexaconChatWidget {
           this.options.visitorId = stored.visitorId;
           this.startSession(stored.session);
         } else if (this.options.preChatForm) {
-          this.ui.showPreChatForm((name, email) => {
+          this.ui.showPreChatForm(async (name, email) => {
             this.options.visitorName = name || "Visitor";
             this.options.visitorEmail = email;
             this.ui.hidePreChatForm();
+
+            // Get nxToken for the guest user
+            try {
+              const nxTokenData = await this.api.getNxToken(name);
+              this.options.visitorId = nxTokenData.jid;
+              // Store nxToken for chat history retrieval
+              sessionStorage.setItem("nexacon_nx_token", nxTokenData.nx_token);
+            } catch (err) {
+              console.error("Failed to get nxToken:", err);
+            }
+
             this.startSession();
           });
         } else {
@@ -97,22 +108,25 @@ export class NexaconChatWidget {
       } else {
         // Fetch chat history for returning visitor
         try {
-          const history = await this.api.fetchChatHistory(
-            session.session_id,
-            session.token,
-            50,
-          );
-          // Display history messages
-          history.forEach((msg: any) => {
-            const chatMsg: ChatMessage = {
-              id: crypto.randomUUID(),
-              from: msg.from === session.session_id ? "me" : msg.from,
-              body: msg.body,
-              timestamp: new Date(msg.timestamp || Date.now()),
-              type: msg.from === session.session_id ? "visitor" : "agent",
-            };
-            this.ui.addMessage(chatMsg);
-          });
+          const nxToken = sessionStorage.getItem("nexacon_nx_token");
+          if (nxToken) {
+            const history = await this.api.fetchChatHistory(
+              session.session_id,
+              nxToken,
+              50,
+            );
+            // Display history messages
+            history.forEach((msg: any) => {
+              const chatMsg: ChatMessage = {
+                id: crypto.randomUUID(),
+                from: msg.from === session.session_id ? "me" : msg.from,
+                body: msg.body,
+                timestamp: new Date(msg.timestamp || Date.now()),
+                type: msg.from === session.session_id ? "visitor" : "agent",
+              };
+              this.ui.addMessage(chatMsg);
+            });
+          }
         } catch (historyErr) {
           // Ignore history fetch errors, continue with session
           console.log("Could not fetch chat history:", historyErr);
@@ -242,11 +256,13 @@ export class NexaconChatWidget {
   }
 
   private saveSessionToStorage(session: GuestSession): void {
+    const nxToken = sessionStorage.getItem("nexacon_nx_token");
     const data = {
       session,
       visitorName: this.options.visitorName,
       visitorEmail: this.options.visitorEmail,
       visitorId: this.options.visitorId,
+      nxToken,
       expiry: Date.now() + this.STORAGE_EXPIRY_DAYS * 24 * 60 * 60 * 1000,
     };
     sessionStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
@@ -257,6 +273,7 @@ export class NexaconChatWidget {
     visitorName: string;
     visitorEmail: string;
     visitorId: string;
+    nxToken?: string;
   } | null {
     const stored = sessionStorage.getItem(this.STORAGE_KEY);
     if (!stored) return null;
@@ -267,11 +284,16 @@ export class NexaconChatWidget {
         sessionStorage.removeItem(this.STORAGE_KEY);
         return null;
       }
+      // Restore nxToken to sessionStorage
+      if (data.nxToken) {
+        sessionStorage.setItem("nexacon_nx_token", data.nxToken);
+      }
       return {
         session: data.session,
         visitorName: data.visitorName,
         visitorEmail: data.visitorEmail,
         visitorId: data.visitorId,
+        nxToken: data.nxToken,
       };
     } catch {
       sessionStorage.removeItem(this.STORAGE_KEY);
