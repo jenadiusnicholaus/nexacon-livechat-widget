@@ -134,7 +134,17 @@ export class ApiClient {
     description: string;
     jid: string;
   }> {
-    const res = await fetch(`${this.baseUrl}/nx/groups/`, {
+    const url = `${this.baseUrl}/nx/groups/`;
+    console.log("Creating room at:", url);
+    console.log("Headers:", {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${nxToken.substring(0, 20)}...`,
+      "API-Key": this.apiKey,
+      "Secret-Key": this.secretKey.substring(0, 10) + "...",
+    });
+    console.log("Body:", { title, description: description || "" });
+
+    const res = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -148,14 +158,20 @@ export class ApiClient {
       }),
     });
 
+    console.log("Room creation response status:", res.status);
+    console.log("Room creation response ok:", res.ok);
+
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
+      console.error("Room creation error details:", err);
       throw new Error(
         `Room creation failed (${res.status}): ${JSON.stringify(err)}`,
       );
     }
 
-    return res.json() as Promise<{
+    const data = await res.json();
+    console.log("Room created successfully:", data);
+    return data as Promise<{
       id: string;
       title: string;
       description: string;
