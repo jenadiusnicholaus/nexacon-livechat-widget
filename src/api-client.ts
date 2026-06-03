@@ -123,4 +123,43 @@ export class ApiClient {
       expires_in: number;
     }>;
   }
+
+  async createRoom(
+    nxToken: string,
+    title: string,
+    description?: string,
+  ): Promise<{
+    id: string;
+    title: string;
+    description: string;
+    jid: string;
+  }> {
+    const res = await fetch(`${this.baseUrl}/nx/groups/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${nxToken}`,
+        "API-Key": this.apiKey,
+        "Secret-Key": this.secretKey,
+      },
+      body: JSON.stringify({
+        title,
+        description: description || "",
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(
+        `Room creation failed (${res.status}): ${JSON.stringify(err)}`,
+      );
+    }
+
+    return res.json() as Promise<{
+      id: string;
+      title: string;
+      description: string;
+      jid: string;
+    }>;
+  }
 }

@@ -60,6 +60,20 @@ export class NexaconChatWidget {
               this.options.visitorId = nxTokenData.jid;
               // Store nxToken for chat history retrieval
               sessionStorage.setItem("nexacon_nx_token", nxTokenData.nx_token);
+
+              // Create a room for the chat
+              try {
+                const roomData = await this.api.createRoom(
+                  nxTokenData.nx_token,
+                  `Chat with ${name}`,
+                  `Support chat for ${name}`,
+                );
+                sessionStorage.setItem("nexacon_room_jid", roomData.jid);
+                console.log("Room created:", roomData.jid);
+              } catch (roomErr) {
+                console.error("Failed to create room:", roomErr);
+                // Continue without room - will use direct messaging
+              }
             } catch (err) {
               console.error("Failed to get nxToken:", err);
             }
@@ -173,10 +187,14 @@ export class NexaconChatWidget {
         }
       }
 
+      // Use room JID from sessionStorage if available, otherwise use session.channel
+      const roomJid =
+        sessionStorage.getItem("nexacon_room_jid") || session.channel;
+
       this.connectXmpp(
         session.session_id,
         session.token,
-        session.channel,
+        roomJid,
         session.ws_url,
       );
     } catch (err: unknown) {
@@ -267,12 +285,14 @@ export class NexaconChatWidget {
 
   private saveSessionToStorage(session: GuestSession): void {
     const nxToken = sessionStorage.getItem("nexacon_nx_token");
+    const roomJid = sessionStorage.getItem("nexacon_room_jid");
     const data = {
       session,
       visitorName: this.options.visitorName,
       visitorEmail: this.options.visitorEmail,
       visitorId: this.options.visitorId,
       nxToken,
+      roomJid,
       expiry: Date.now() + this.STORAGE_EXPIRY_DAYS * 24 * 60 * 60 * 1000,
     };
     sessionStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
@@ -284,6 +304,7 @@ export class NexaconChatWidget {
     visitorEmail: string;
     visitorId: string;
     nxToken?: string;
+    roomJid?: string;
   } | null {
     const stored = sessionStorage.getItem(this.STORAGE_KEY);
     if (!stored) return null;
@@ -298,12 +319,17 @@ export class NexaconChatWidget {
       if (data.nxToken) {
         sessionStorage.setItem("nexacon_nx_token", data.nxToken);
       }
+      // Restore room JID to sessionStorage
+      if (data.roomJid) {
+        sessionStorage.setItem("nexacon_room_jid", data.roomJid);
+      }
       return {
         session: data.session,
         visitorName: data.visitorName,
         visitorEmail: data.visitorEmail,
         visitorId: data.visitorId,
         nxToken: data.nxToken,
+        roomJid: data.roomJid,
       };
     } catch {
       sessionStorage.removeItem(this.STORAGE_KEY);
