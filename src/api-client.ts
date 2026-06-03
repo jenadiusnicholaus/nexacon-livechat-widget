@@ -52,26 +52,4 @@ export class ApiClient {
 
     return res.json() as Promise<GuestSession>;
   }
-
-  async fetchChatHistory(
-    peer: string,
-    nxToken: string,
-    limit: number = 50,
-  ): Promise<any[]> {
-    const res = await fetch(
-      `${this.baseUrl}/nx/history/?limit=${limit}&peer=${encodeURIComponent(peer)}`,
-      {
-        method: "GET",
-        headers: {
-          "X-NX-Token": nxToken,
-        },
-      },
-    );
-
-    if (!res.ok) {
-      throw new Error(`Failed to fetch chat history (${res.status})`);
-    }
-
-    return res.json() as Promise<any[]>;
-  }
 }

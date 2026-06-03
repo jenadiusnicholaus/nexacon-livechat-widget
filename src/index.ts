@@ -66,29 +66,6 @@ export class NexaconChatWidget {
         email: this.options.visitorEmail,
       });
 
-      // Fetch chat history if this is a returning visitor
-      try {
-        const history = await this.api.fetchChatHistory(
-          session.session_id,
-          session.token,
-          50,
-        );
-        // Display history messages
-        history.forEach((msg: any) => {
-          const chatMsg: ChatMessage = {
-            id: crypto.randomUUID(),
-            from: msg.from === session.session_id ? "me" : msg.from,
-            body: msg.body,
-            timestamp: new Date(msg.timestamp || Date.now()),
-            type: msg.from === session.session_id ? "visitor" : "agent",
-          };
-          this.ui.addMessage(chatMsg);
-        });
-      } catch (historyErr) {
-        // Ignore history fetch errors, continue with session
-        console.log("Could not fetch chat history:", historyErr);
-      }
-
       this.addSystemMessage(
         session.welcome_message || "Welcome! How can we help?",
       );
